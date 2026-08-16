@@ -259,7 +259,6 @@ if [ "$LAUNCHERS" -eq 1 ]; then
   DEST="$(cd "$(dirname "$OUT")" && pwd)"
   BASE="$(basename "$OUT")"
   URLBASE="${BASE// /%20}"
-  BATURL="${URLBASE//%/%%}"       # batch eats a lone % , so double it
 
   for f in romshelf.png romshelf.ico icon.svg; do
     src=""
