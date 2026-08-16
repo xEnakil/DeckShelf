@@ -1,5 +1,5 @@
 name: Bug report
-description: Report reproducible scanner, browser or Windows app behavior.
+description: Report reproducible scanner, browser, or native app behavior.
 title: "[Bug]: "
 labels: [bug]
 body:
@@ -19,6 +19,8 @@ body:
         - Steam Deck scanner
         - Browser HTML shelf
         - Native Windows app
+        - Native macOS app
+        - Native Linux app
         - Build or release
     validations:
       required: true
@@ -47,7 +49,6 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Include Windows or SteamOS version, browser, and relevant setup details.
+      description: Include the operating-system version, browser or webview version, and relevant setup details.
     validations:
       required: true
-
