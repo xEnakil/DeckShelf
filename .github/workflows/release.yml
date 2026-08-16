@@ -79,7 +79,7 @@ jobs:
           RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: |
           gh release create "$RELEASE_TAG" \
-            "dist/ROM Shelf.exe#ROM Shelf.exe" \
+            "dist/ROM-Shelf.exe#ROM Shelf.exe" \
             "dist/ROM-Shelf-$RELEASE_VERSION-windows-x64.zip#Portable Windows bundle" \
             "dist/SHA256SUMS.txt#SHA-256 checksums" \
             --verify-tag \

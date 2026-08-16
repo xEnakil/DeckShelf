@@ -18,6 +18,7 @@ STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 BUNDLE="$STAGE/ROM Shelf $VERSION"
 ARCHIVE="ROM-Shelf-$VERSION-windows-x64.zip"
+STANDALONE="ROM-Shelf.exe"
 
 mkdir -p "$BUNDLE/assets"
 cp "$BINARY" "$BUNDLE/ROM Shelf.exe"
@@ -29,14 +30,15 @@ cp "$ROOT/THIRD_PARTY_NOTICES.md" "$BUNDLE/THIRD_PARTY_NOTICES.md"
 cp "$ROOT/examples/library.sample.json" "$BUNDLE/library.sample.json"
 cp "$ROOT/assets/icon.svg" "$ROOT/assets/romshelf.png" "$ROOT/assets/romshelf.ico" "$BUNDLE/assets/"
 
-rm -f "$OUT/$ARCHIVE" "$OUT/SHA256SUMS.txt"
+rm -f "$OUT/$ARCHIVE" "$OUT/$STANDALONE" "$OUT/SHA256SUMS.txt"
+cp "$BINARY" "$OUT/$STANDALONE"
 (
   cd "$STAGE"
   zip -qr "$OUT/$ARCHIVE" "$(basename "$BUNDLE")"
 )
 (
   cd "$OUT"
-  sha256sum "ROM Shelf.exe" "$ARCHIVE" > SHA256SUMS.txt
+  sha256sum "$STANDALONE" "$ARCHIVE" > SHA256SUMS.txt
 )
 
 printf 'Packaged %s\n' "$OUT/$ARCHIVE"
