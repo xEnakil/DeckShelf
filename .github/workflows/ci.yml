@@ -14,53 +14,90 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate-and-build:
+  scanner:
+    name: Scanner and shell checks
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 10
 
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Set up Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version-file: go.mod
-          cache: true
-
-      - name: Install validation and cross-build tools
+      - name: Install shellcheck
         run: |
           sudo apt-get update
-          sudo apt-get install --no-install-recommends -y \
-            binutils-mingw-w64-x86-64 \
-            g++-mingw-w64-x86-64-posix \
-            gcc-mingw-w64-x86-64-posix \
-            shellcheck
-
-      - name: Check formatting and modules
-        run: |
-          test -z "$(gofmt -l .)"
-          go mod verify
+          sudo apt-get install --no-install-recommends -y shellcheck
 
       - name: Lint shell scripts
         run: shellcheck generate-library.sh scripts/*.sh tests/*.sh
 
-      - name: Test generator
+      - name: Test the library generator
         run: ./tests/test-generator.sh
 
-      - name: Build native Windows app
-        env:
-          VERSION: ci-${{ github.sha }}
-        run: ./scripts/build-windows.sh
+  native:
+    name: Native / ${{ matrix.label }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Windows x64
+            runner: windows-2025
+            platform: windows
+            arch: x64
+          - label: Linux x64
+            runner: ubuntu-24.04
+            platform: linux
+            arch: x64
+          - label: macOS Apple Silicon
+            runner: macos-15
+            platform: macos
+            arch: arm64
+          - label: macOS Intel
+            runner: macos-15-intel
+            platform: macos
+            arch: x64
 
-      - name: Verify native runtime dependencies
-        run: ./scripts/verify-windows-binary.sh
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Upload Windows build
+      - name: Install Linux webview headers
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y libwebkit2gtk-4.1-dev
+
+      - name: Install pinned Rust toolchain
+        run: rustup show
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run tests
+        run: cargo test --locked --all-targets
+
+      - name: Run Clippy
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+      - name: Build optimized native app
+        run: cargo build --locked --release
+
+      - name: Verify portable Windows binary
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/verify-windows-binary.ps1
+
+      - name: Package smoke-test artifact
+        shell: bash
+        run: ./scripts/package-release.sh ci "${{ matrix.platform }}" "${{ matrix.arch }}"
+
+      - name: Upload native artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: rom-shelf-windows-x64
-          path: dist/ROM Shelf.exe
+          name: deck-shelf-${{ matrix.platform }}-${{ matrix.arch }}
+          path: dist/*
           if-no-files-found: error
           retention-days: 14
 
