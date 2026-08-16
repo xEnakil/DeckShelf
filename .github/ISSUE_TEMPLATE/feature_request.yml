@@ -1,0 +1,32 @@
+name: Feature request
+description: Propose a focused improvement that preserves ROM Shelf's offline-first design.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Explain the smallest useful behavior and which platform it affects.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    attributes:
+      label: Project principles
+      options:
+        - label: This proposal can work without uploading a user's library.
+          required: true
+        - label: This proposal does not distribute or download ROMs or BIOS files.
+          required: true
+

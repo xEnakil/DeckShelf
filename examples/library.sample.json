@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "generated": 0,
+  "root": "/home/deck/Emulation/roms",
+  "games": [
+    ["dreamcast", "Neon Harbor (Demo).chd", 734003200, 0],
+    ["gba", "Pocket Orchard (Demo).gba", 8388608, 0],
+    ["ps3", "Clockwork Island", 4294967296, 0],
+    ["snes", "Example Quest (USA).sfc", 2097152, 0]
+  ]
+}
+

@@ -1,0 +1,53 @@
+name: Bug report
+description: Report reproducible scanner, browser or Windows app behavior.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: checkboxes
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked for an existing issue.
+          required: true
+        - label: I removed ROM names, usernames and private filesystem paths from this report.
+          required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected part
+      options:
+        - Steam Deck scanner
+        - Browser HTML shelf
+        - Native Windows app
+        - Build or release
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: v1.0.0 or commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the expected and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      placeholder: Use a minimal fictional directory layout when the scanner is involved.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include Windows or SteamOS version, browser, and relevant setup details.
+    validations:
+      required: true
+
