@@ -56,6 +56,9 @@ func initPaths() error {
 	applicationDir = filepath.Dir(executable)
 	settingsPath = filepath.Join(applicationDir, settingsName)
 	libraryPath = filepath.Join(applicationDir, defaultData)
+	if err := os.Setenv("WEBVIEW2_USER_DATA_FOLDER", filepath.Join(applicationDir, "shelf-cache")); err != nil {
+		return err
+	}
 
 	if len(os.Args) > 1 && strings.EqualFold(filepath.Ext(os.Args[1]), ".json") {
 		path, err := filepath.Abs(os.Args[1])
