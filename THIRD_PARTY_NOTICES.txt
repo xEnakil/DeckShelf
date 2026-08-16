@@ -1,0 +1,18 @@
+Deck Shelf third-party notices
+==============================
+
+The native application is built from Rust crates recorded exactly in Cargo.lock.
+The principal UI and windowing libraries are:
+
+- Wry 0.56.1 (Apache-2.0 OR MIT)
+- Tao 0.36.0 (Apache-2.0 OR MIT)
+- Serde and serde_json (Apache-2.0 OR MIT)
+- image (MIT OR Apache-2.0)
+- open (MIT)
+
+Cargo.lock is the authoritative inventory of direct and transitive source
+dependencies for a release. Each crate's source distribution contains its
+copyright and license terms. Deck Shelf does not bundle an Electron, Node.js,
+WebView2, WKWebView, WebKitGTK, or Visual C++ runtime. Windows and macOS use the
+webview supplied by the operating system. Linux uses the system WebKitGTK 4.1
+library.

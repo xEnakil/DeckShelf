@@ -1,11 +1,11 @@
-# ROM Shelf
+# Deck Shelf
 
 <p align="center">
-  <img src="assets/icon.svg" width="112" height="112" alt="ROM Shelf cartridge icon">
+  <img src="assets/icon.svg" width="112" height="112" alt="Deck Shelf cartridge icon">
 </p>
 
 <p align="center">
-  A fast, private and portable catalogue for the games on your Steam Deck.
+  A fast, private, portable catalogue for the games you already manage.
 </p>
 
 <p align="center">
@@ -14,153 +14,144 @@
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-2323C8"></a>
 </p>
 
-ROM Shelf scans the ROM folders you already manage and turns them into a searchable, offline library. Use the native Windows app for its own window and taskbar entry, or generate a single HTML file that works in any modern browser.
+Deck Shelf scans the ROM folders you already manage and turns them into a searchable offline library. It does not include an emulator, download games, launch games, or upload your library.
 
-> ROM Shelf is a catalogue, not an emulator or ROM downloader. It never includes, copies or launches copyrighted game data.
+The same interface ships in two forms:
+
+- a small Rust desktop application using the webview already provided by the operating system;
+- a self-contained HTML file that opens in any modern browser.
+
+No Electron. No Node.js runtime. No account, server, telemetry, or installer.
 
 ## Download
 
-[Download the latest Windows release](https://github.com/xEnakil/DeckShelf/releases/latest), extract it, and keep `ROM Shelf.exe` next to the `library.json` generated on your Steam Deck.
+Download the archive for your system from the [latest release](https://github.com/xEnakil/DeckShelf/releases/latest):
 
-The Windows binary is currently unsigned, so SmartScreen may show a first-run warning. Published releases include SHA-256 checksums and are rebuilt from this repository by GitHub Actions.
-
-## How it works
-
-| Part | Runs on | Purpose |
+| Platform | Native engine | Release |
 |---|---|---|
-| `generate-library.sh` | Steam Deck / Linux | Scans your selected ROM directory and writes `library.json` or a complete HTML shelf |
-| `library-template.html` | Any modern browser | Provides the complete interface, search and local browser storage |
-| `ROM Shelf.exe` | Windows 10/11 | Hosts that same template in a native WebView2 window |
+| Windows 10/11 x64 | WebView2 | `windows-x64` |
+| macOS Apple Silicon | WKWebView | `macos-arm64` |
+| macOS Intel | WKWebView | `macos-x64` |
+| Linux x64 | WebKitGTK 4.1 | `linux-x64` |
+| Any modern browser | Browser engine | Generate `Deck Shelf.html` |
 
-Both versions use one HTML template. The native app injects `library.json` when the page loads and stores preferences in `shelf-settings.json`; the browser build embeds the library and uses `localStorage`.
+Keep the native executable beside `library.json`. Windows preferences and webview data remain portable in `deck-shelf-settings.json` and `deck-shelf-cache` beside the executable. Linux requires the system WebKitGTK 4.1 package. Published binaries are unsigned and releases include SHA-256 checksums.
 
 ## Quick start
 
-### 1. Create your library on the Steam Deck
+### 1. Build the library index
 
-In Desktop Mode, put `generate-library.sh`, `library-template.html` and the `assets` folder together, then run:
+In Steam Deck Desktop Mode, keep `generate-library.sh`, `library-template.html`, and `assets` together. Then run:
 
 ```bash
 chmod +x generate-library.sh
 ./generate-library.sh --json-only
 ```
 
-The scanner checks common EmuDeck and RetroDECK locations. Point it somewhere else when needed:
+The scanner detects common EmuDeck and RetroDECK locations. An explicit path also works:
 
 ```bash
 ./generate-library.sh --roms /run/media/deck/SDCARD/Emulation/roms --json-only
 ```
 
-### 2. Open it on Windows
+### 2. Open Deck Shelf
 
-Copy `library.json` beside `ROM Shelf.exe`, then double-click the executable. You can also drag a JSON file onto the executable or drop one into the open window.
+Copy the resulting `library.json` beside the native application and launch it. A JSON path can also be passed as the first command-line argument. Replace `library.json` and refresh the window after rescanning.
 
-When you update your library, replace `library.json` and press <kbd>F5</kbd>. The native app reads it from disk on every reload.
+If the Windows WebView2 runtime cannot initialize, Deck Shelf writes a self-contained browser fallback beside the executable and opens it instead of crashing.
 
-### Browser-only build
+### Browser-only mode
 
 Run the generator without `--json-only`:
 
 ```bash
-./generate-library.sh --name "Deck Vault"
+./generate-library.sh
 ```
 
-This creates a self-contained HTML file plus launchers for Linux, Windows and macOS. Copy the generated folder anywhere and open the launcher for your platform.
+This writes `Deck Shelf.html` plus small launchers for Linux, Windows, and macOS. The generated page embeds the library, works offline, and stores preferences in browser `localStorage`.
 
 ## Scanner options
 
 ```text
 -r, --roms DIR       folder to scan
--o, --out FILE       output HTML path (default: ROM Shelf.html)
+-o, --out FILE       output HTML path (default: Deck Shelf.html)
 -t, --template FILE  template to use
 -s, --systems FILE   scan only systems listed in a file, one per line
--n, --name NAME      shelf and output name (default: ROM Shelf)
+-n, --name NAME      app and output name (default: Deck Shelf)
 -x, --exclude NAME   ignore a file or folder name; repeat as needed
     --no-launchers   create HTML without platform launchers
     --json-only      write library.json without HTML
-    --all            keep files that the normal safety filters skip
+    --all            keep files the normal safety filters skip
 ```
 
-Names may contain letters, numbers, spaces, dots, dashes and underscores.
+The scanner removes common false positives before they reach the UI:
 
-## What the scanner excludes
+- EmuDeck and RetroDECK bookkeeping, metadata, artwork, manuals, videos, saves, states, caches, and logs;
+- empty files, patches, configuration files, and desktop shortcuts;
+- duplicate disc tracks when a matching `.cue`, `.gdi`, `.m3u`, or `.ccd` exists;
+- systems with no remaining games.
 
-ROM Shelf removes common false positives before they reach the UI:
+Folder-based systems such as PS3, Wii U, DOS, ports, and ScummVM are counted one top-level folder at a time. Use repeated `--exclude` flags for setup-specific clutter or `--all` to keep every entry.
 
-- EmuDeck and RetroDECK bookkeeping such as `systeminfo.txt`, `metadata.txt` and `gamelist.xml`.
-- Emulator working folders, saves, states, caches, logs, artwork, manuals and videos.
-- Empty files, patches, configuration files and desktop shortcuts.
-- `.bin`, `.raw`, `.sub` and related tracks when a matching `.cue`, `.gdi`, `.m3u` or `.ccd` exists.
-- Systems that have no remaining games.
+## Search and library tools
 
-Folder-based systems such as PS3, Wii U, DOS, ports and ScummVM are counted one top-level folder at a time, including the folder's total size. Use repeated `--exclude` options for setup-specific clutter, or `--all` when you intentionally want every entry.
+- Punctuation-insensitive, case-insensitive title search.
+- Terms in any order and filters such as `sys:snes`, `region:japan`, `ext:chd`, and `fav:`.
+- Typo suggestions, favourites, recent searches, theme persistence, and keyboard shortcuts.
+- A list checker for comparing wanted titles against the shelf.
+- Text export, storage breakdowns, system filters, and duplicate-title collapsing.
 
-## Using the shelf
+## Native design
 
-- Search ignores punctuation and case: `supermetroid` can match *Super Metroid*.
-- Terms can appear in any order: `zelda link past` matches the complete title.
-- Filters such as `sys:snes`, `region:japan`, `ext:chd` and `fav:` mix with normal words.
-- Typo suggestions help recover near matches.
-- **Check a list** compares pasted titles with your shelf and copies the missing entries.
-- **Export** saves the current results to a text file.
-- The storage chart breaks usage down by system and doubles as a filter.
-- Duplicate titles collapse into one row while preserving every file and system.
-- Press <kbd>?</kbd> for the complete shortcut list.
+The desktop shell is written in Rust with [Wry](https://github.com/tauri-apps/wry) and [Tao](https://github.com/tauri-apps/tao). It embeds `library-template.html` at compile time and adds only four native responsibilities:
 
-Stars, filters, theme, recent searches and the last query survive restarts.
+1. own the window, taskbar entry, and icon;
+2. load and validate `library.json`;
+3. persist an allowlisted set of preferences beside the executable;
+4. host the page through a private custom protocol with a restrictive content-security policy.
 
-## Native Windows app
+Rust release builds use optimization level 3, thin LTO, one code-generation unit, stripped symbols, and abort-on-panic. The Windows target statically links its C runtime; dependency verification rejects Visual C++ redistributable imports. The current optimized Windows build is about 1.2 MB and imports Windows system libraries only.
 
-ROM Shelf is a genuine native executable built with Go, MinGW-w64 and [`webview_go`](https://github.com/webview/webview_go). It uses the WebView2 runtime included with current Windows 10 and Windows 11 installations and links only to Windows system libraries. There is no Electron, Node.js runtime, installer or Visual C++ redistributable.
+Most search and rendering work still happens in the shared JavaScript interface, so Rust is not presented as a magic speed switch. Its value here is a small, memory-safe native layer, strong release builds, and one implementation across Windows, macOS, and Linux.
 
-The executable:
+## Build and test
 
-- owns its window, taskbar entry and icon;
-- reads `library.json` from beside the executable or from a dropped path;
-- writes portable preferences to `shelf-settings.json` beside the executable;
-- keeps WebView2 data in the local `shelf-cache` directory;
-- falls back to an installed browser when WebView2 is unavailable.
+Install Rust 1.97.1 or let `rustup` use the checked-in toolchain file.
 
-The UI is served only on `127.0.0.1` behind a random per-run path. A restrictive content-security policy prevents the page from making network requests. Nothing in your game list is uploaded.
-
-## Build from source
-
-The scanner and browser build require Bash, `find`, `awk` and `du`. The native build additionally needs Go 1.22+ and a MinGW-w64 cross-compiler:
+Windows needs Visual Studio Build Tools with the Desktop development with C++ workload. macOS needs Xcode Command Line Tools. Debian and Ubuntu need WebKitGTK headers:
 
 ```bash
-sudo apt-get install mingw-w64
-VERSION=dev ./scripts/build-windows.sh
+sudo apt install libwebkit2gtk-4.1-dev
 ```
 
-The executable is written to `dist/ROM Shelf.exe`. The build script compiles resource `#1` from `assets/romshelf.ico`, which the application applies with `WM_SETICON`.
-
-Run the generator regression suite with:
+Then run:
 
 ```bash
+cargo fmt --all -- --check
+cargo test --locked --all-targets
+cargo clippy --locked --all-targets -- -D warnings
+cargo build --locked --release
 ./tests/test-generator.sh
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the data and runtime design.
+GitHub Actions repeats those checks on Windows x64, Linux x64, macOS Apple Silicon, and macOS Intel. Tags build all four release archives and publish a single checksum manifest.
 
-## Repository layout
+## Repository
 
 ```text
-assets/                  shared icons
-docs/                    architecture and project documentation
-scripts/build-windows.sh reproducible native build
-tests/                   generator regression tests
-app_windows.go           data, settings and local server
-main_windows.go          WebView2 window and Windows integration
-generate-library.sh      Steam Deck scanner
-library-template.html    the single shared UI template
+src/                       Rust native shell and portable storage
+assets/                    shared application icons
+scripts/                   release packaging and Windows dependency checks
+tests/                     scanner regression tests
+generate-library.sh        Steam Deck and Linux scanner
+library-template.html      the single shared interface
+examples/library.sample.json
 ```
 
-Generated libraries, personal settings, caches and executables are ignored by Git. An intentionally fictional sample is available at [`examples/library.sample.json`](examples/library.sample.json).
+Personal libraries, settings, caches, generated pages, and binaries are ignored by Git. The sample library is intentionally fictional.
 
-## Contributing and security
-
-Issues and pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before sending a change. Report security problems privately using [GitHub's security advisory form](https://github.com/xEnakil/DeckShelf/security/advisories/new) rather than opening a public issue.
+`@xEnakil` is the sole maintainer and project decision-maker. Anyone can use the public [issue tracker](https://github.com/xEnakil/DeckShelf/issues) for reproducible bugs or focused feature requests. Security problems should use the repository's [private advisory form](https://github.com/xEnakil/DeckShelf/security/advisories/new).
 
 ## License
 
-ROM Shelf is available under the [MIT License](LICENSE).
+Deck Shelf is available under the [MIT License](LICENSE). Third-party dependency information is recorded in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt) and `Cargo.lock`.
