@@ -1,5 +1,5 @@
 name: Feature request
-description: Propose a focused improvement that preserves ROM Shelf's offline-first design.
+description: Propose a focused improvement that preserves Deck Shelf's offline-first design.
 title: "[Feature]: "
 labels: [enhancement]
 body:
@@ -29,4 +29,3 @@ body:
           required: true
         - label: This proposal does not distribute or download ROMs or BIOS files.
           required: true
-

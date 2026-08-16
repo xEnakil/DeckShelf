@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  ROM Shelf — library generator
+#  Deck Shelf — library generator
 #  Scans your ROM folders and writes a single self-contained HTML file you can
 #  copy to any computer and open offline.
 #
@@ -23,7 +23,7 @@ TEMPLATE="$SCRIPT_DIR/library-template.html"
 OUT=""
 ROOT=""
 SYSFILE=""
-NAME="ROM Shelf"
+NAME="Deck Shelf"
 JSON_ONLY=0
 KEEP_ALL=0
 LAUNCHERS=1
@@ -74,7 +74,7 @@ fi
 [ -n "$ROOT" ] || die "Could not find a roms folder. Point me at one:  $0 -r /path/to/roms"
 [ -d "$ROOT" ] || die "Not a folder: $ROOT"
 ROOT="$(cd "$ROOT" && pwd)"
-[ -n "$NAME" ] || NAME="ROM Shelf"
+[ -n "$NAME" ] || NAME="Deck Shelf"
 [ -n "$OUT" ] || OUT="$SCRIPT_DIR/$NAME.html"
 mkdir -p "$(dirname "$OUT")" || die "Cannot write to $(dirname "$OUT")"
 JSON_OUT="$(dirname "$OUT")/library.json"
@@ -262,7 +262,7 @@ if [ "$LAUNCHERS" -eq 1 ]; then
   BASE="$(basename "$OUT")"
   URLBASE="${BASE// /%20}"
 
-  for f in romshelf.png romshelf.ico icon.svg; do
+  for f in deck-shelf.png deck-shelf.ico icon.svg; do
     src=""
     [ -f "$SCRIPT_DIR/$f" ] && src="$SCRIPT_DIR/$f"
     [ -z "$src" ] && [ -f "$SCRIPT_DIR/assets/$f" ] && src="$SCRIPT_DIR/assets/$f"
@@ -270,19 +270,19 @@ if [ "$LAUNCHERS" -eq 1 ]; then
   done
 
   # small opener: app-mode browser window if we can, plain browser if not
-  cat > "$DEST/open-shelf.sh" <<OPENER
+  cat > "$DEST/open-deck-shelf.sh" <<OPENER
 #!/usr/bin/env bash
 here="\$(cd -- "\$(dirname -- "\${BASH_SOURCE[0]}")" && pwd)"
 page="file://\$here/$URLBASE"
 for b in google-chrome-stable google-chrome chromium chromium-browser brave-browser microsoft-edge vivaldi-stable; do
-  if command -v "\$b" >/dev/null 2>&1; then exec "\$b" --app="\$page" --class="ROM-Shelf"; fi
+  if command -v "\$b" >/dev/null 2>&1; then exec "\$b" --app="\$page" --class="Deck-Shelf"; fi
 done
 if command -v flatpak >/dev/null 2>&1 && flatpak info com.google.Chrome >/dev/null 2>&1; then
   exec flatpak run com.google.Chrome --app="\$page"
 fi
 exec xdg-open "\$here/$BASE"
 OPENER
-  chmod +x "$DEST/open-shelf.sh"
+  chmod +x "$DEST/open-deck-shelf.sh"
 
   cat > "$DEST/$NAME.desktop" <<DESKTOP
 [Desktop Entry]
@@ -290,11 +290,11 @@ Type=Application
 Version=1.0
 Name=$NAME
 Comment=Search the games on your Steam Deck
-Exec=$DEST/open-shelf.sh
-Icon=$DEST/romshelf.png
+Exec=$DEST/open-deck-shelf.sh
+Icon=$DEST/deck-shelf.png
 Terminal=false
 Categories=Game;Utility;
-StartupWMClass=ROM-Shelf
+StartupWMClass=Deck-Shelf
 DESKTOP
   chmod +x "$DEST/$NAME.desktop"
 
@@ -311,7 +311,7 @@ start "" "%~dp0$BASE"
 BAT
 
   say "Also wrote: $NAME.desktop (Linux/Deck) · Launch $NAME.bat (Windows) · $NAME.command (macOS) · icons"
-  say "On Windows, use ROM Shelf.exe instead — it needs only library.json."
+  say "For a native window, use the Deck Shelf executable for your platform — it needs only library.json."
 fi
 
 say ""
