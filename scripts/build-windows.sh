@@ -15,7 +15,13 @@ done
 mkdir -p "$OUT"
 cd "$ROOT"
 
-cleanup(){ rm -f "$ROOT/romshelf.syso"; }
+CASE_INCLUDE="$(mktemp -d)"
+printf '#include <eventtoken.h>\n' > "$CASE_INCLUDE/EventToken.h"
+
+cleanup(){
+  rm -f "$ROOT/romshelf.syso"
+  rm -rf "$CASE_INCLUDE"
+}
 trap cleanup EXIT
 
 x86_64-w64-mingw32-windres -i romshelf.rc -o romshelf.syso
@@ -25,6 +31,7 @@ GOARCH=amd64 \
 CGO_ENABLED=1 \
 CC=x86_64-w64-mingw32-gcc \
 CXX=x86_64-w64-mingw32-g++ \
+CGO_CXXFLAGS="-I$CASE_INCLUDE" \
 go build \
   -trimpath \
   -ldflags "-H windowsgui -s -w -X main.version=$VERSION" \
