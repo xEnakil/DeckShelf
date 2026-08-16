@@ -26,7 +26,9 @@ cleanup(){
 }
 trap cleanup EXIT
 
-WEBVIEW_DIR="$(GOMODCACHE="$MODULE_CACHE" go list -mod=mod -m -f '{{.Dir}}' github.com/webview/webview_go)"
+WEBVIEW_VERSION="$(go list -mod=mod -m -f '{{.Version}}' github.com/webview/webview_go)"
+GOMODCACHE="$MODULE_CACHE" go mod download github.com/webview/webview_go
+WEBVIEW_DIR="$MODULE_CACHE/github.com/webview/webview_go@$WEBVIEW_VERSION"
 chmod -R u+w "$WEBVIEW_DIR"
 patch --directory "$WEBVIEW_DIR" --strip 1 --forward --silent \
   < "$ROOT/patches/webview-portable-cache.patch"
