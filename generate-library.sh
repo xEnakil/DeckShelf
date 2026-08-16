@@ -31,22 +31,28 @@ JUNK_EXTRA=""
 
 die(){ printf '\033[31m%s\033[0m\n' "$*" >&2; exit 1; }
 say(){ printf '%s\n' "$*"; }
+need_value(){
+  [ $# -ge 2 ] && [ -n "${2:-}" ] || die "Option $1 needs a value."
+}
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    -r|--roms)      ROOT="${2:-}"; shift 2 ;;
-    -o|--out)       OUT="${2:-}"; shift 2 ;;
-    -t|--template)  TEMPLATE="${2:-}"; shift 2 ;;
-    -s|--systems)   SYSFILE="${2:-}"; shift 2 ;;
-    -n|--name)      NAME="${2:-}"; shift 2 ;;
+    -r|--roms)      need_value "$@"; ROOT="$2"; shift 2 ;;
+    -o|--out)       need_value "$@"; OUT="$2"; shift 2 ;;
+    -t|--template)  need_value "$@"; TEMPLATE="$2"; shift 2 ;;
+    -s|--systems)   need_value "$@"; SYSFILE="$2"; shift 2 ;;
+    -n|--name)      need_value "$@"; NAME="$2"; shift 2 ;;
     --no-launchers) LAUNCHERS=0; shift ;;
-    -x|--exclude)   JUNK_EXTRA="$JUNK_EXTRA ${2:-}"; shift 2 ;;
+    -x|--exclude)   need_value "$@"; JUNK_EXTRA="$JUNK_EXTRA $2"; shift 2 ;;
     --json-only)    JSON_ONLY=1; shift ;;
     --all)          KEEP_ALL=1; shift ;;
     -h|--help)      sed -n '2,20p' "$0"; exit 0 ;;
     *)              die "Unknown option: $1  (try --help)" ;;
   esac
 done
+
+[[ "$NAME" =~ ^[A-Za-z0-9._\ -]+$ ]] || \
+  die "Name may contain only letters, numbers, spaces, dots, dashes and underscores."
 
 # ---------------------------------------------------------------- find the roms
 if [ -z "$ROOT" ]; then
@@ -201,6 +207,7 @@ awk -F'\t' -v root="$ROOT" -v ts="$(date +%s)" '
   function esc(s){
     gsub(/\\/,"\\\\",s); gsub(/"/,"\\\"",s)
     gsub(/\t/," ",s); gsub(/\r/,"",s)
+    gsub(/&/,"\\u0026",s); gsub(/</,"\\u003c",s); gsub(/>/,"\\u003e",s)
     return s
   }
   BEGIN{
@@ -255,7 +262,10 @@ if [ "$LAUNCHERS" -eq 1 ]; then
   BATURL="${URLBASE//%/%%}"       # batch eats a lone % , so double it
 
   for f in romshelf.png romshelf.ico icon.svg; do
-    [ -f "$SCRIPT_DIR/$f" ] && [ "$SCRIPT_DIR" != "$DEST" ] && cp -f "$SCRIPT_DIR/$f" "$DEST/$f"
+    src=""
+    [ -f "$SCRIPT_DIR/$f" ] && src="$SCRIPT_DIR/$f"
+    [ -z "$src" ] && [ -f "$SCRIPT_DIR/assets/$f" ] && src="$SCRIPT_DIR/assets/$f"
+    [ -n "$src" ] && [ "$src" != "$DEST/$f" ] && cp -f "$src" "$DEST/$f"
   done
 
   # small opener: app-mode browser window if we can, plain browser if not
@@ -294,7 +304,12 @@ open "$BASE"
 CMD
   chmod +x "$DEST/$NAME.command"
 
-  say "Also wrote: $NAME.desktop (Linux/Deck) · $NAME.command (macOS) · romshelf.png/.ico"
+  cat > "$DEST/Launch $NAME.bat" <<BAT
+@echo off
+start "" "%~dp0$BASE"
+BAT
+
+  say "Also wrote: $NAME.desktop (Linux/Deck) · Launch $NAME.bat (Windows) · $NAME.command (macOS) · icons"
   say "On Windows, use ROM Shelf.exe instead — it needs only library.json."
 fi
 
