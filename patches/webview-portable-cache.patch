@@ -1,0 +1,26 @@
+--- a/libs/webview/include/webview.h
++++ b/libs/webview/include/webview.h
+@@ -3319,13 +3319,17 @@ private:
+     GetModuleFileNameW(nullptr, currentExePath, MAX_PATH);
+     wchar_t *currentExeName = PathFindFileNameW(currentExePath);
+ 
+-    wchar_t dataPath[MAX_PATH];
+-    if (!SUCCEEDED(
+-            SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, 0, dataPath))) {
+-      return false;
+-    }
+     wchar_t userDataFolder[MAX_PATH];
+-    PathCombineW(userDataFolder, dataPath, currentExeName);
++    auto userDataFolderLength = GetEnvironmentVariableW(
++        L"WEBVIEW2_USER_DATA_FOLDER", userDataFolder, MAX_PATH);
++    if (userDataFolderLength == 0 || userDataFolderLength >= MAX_PATH) {
++      wchar_t dataPath[MAX_PATH];
++      if (!SUCCEEDED(
++              SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, 0, dataPath))) {
++        return false;
++      }
++      PathCombineW(userDataFolder, dataPath, currentExeName);
++    }
+ 
+     m_com_handler = new webview2_com_handler(
+         wnd, cb,

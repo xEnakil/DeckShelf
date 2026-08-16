@@ -52,5 +52,4 @@ The loopback handler serves one exact random path, sends `Cache-Control: no-stor
 
 ## Build and release
 
-`scripts/build-windows.sh` uses Go with a MinGW-w64 CGO cross-compiler. `romshelf.rc` becomes resource `#1`, and linker flags produce a GUI subsystem executable with symbols stripped. Tagged releases rebuild the executable, package the portable files and publish SHA-256 checksums.
-
+`scripts/build-windows.sh` uses Go with a MinGW-w64 CGO cross-compiler. It applies a small reviewed patch to the pinned `webview_go` source so the bridge accepts `WEBVIEW2_USER_DATA_FOLDER`; this keeps WebView2 state beside the executable instead of roaming AppData. `romshelf.rc` becomes resource `#1`, and linker flags produce a GUI subsystem executable with symbols stripped. Tagged releases rebuild the executable, package the portable files and publish SHA-256 checksums.

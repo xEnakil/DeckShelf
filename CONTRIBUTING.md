@@ -26,7 +26,7 @@ sudo apt-get install mingw-w64
 VERSION=dev ./scripts/build-windows.sh
 ```
 
-The native build uses CGO because `webview_go` includes a small C/C++ WebView2 bridge. The resulting application remains a single self-contained executable and has no third-party runtime redistributable.
+The native build uses CGO because `webview_go` includes a small C/C++ WebView2 bridge. The build script applies the reviewed patch in `patches/webview-portable-cache.patch` to make the dependency honor the app's portable cache directory. The resulting application remains a single self-contained executable and has no third-party runtime redistributable.
 
 ## Pull requests
 
@@ -37,4 +37,3 @@ The native build uses CGO because `webview_go` includes a small C/C++ WebView2 b
 5. Keep commits reviewable; Conventional Commit-style subjects are encouraged.
 
 By contributing, you agree that your work may be distributed under the repository's MIT License.
-

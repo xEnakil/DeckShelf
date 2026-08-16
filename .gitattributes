@@ -3,6 +3,7 @@
 *.go text eol=lf
 *.html text eol=lf
 *.md text eol=lf
+*.patch text eol=lf
 *.rc text eol=lf
 *.sh text eol=lf
 *.yml text eol=lf
