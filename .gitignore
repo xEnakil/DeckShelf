@@ -1,0 +1,21 @@
+# Personal library data and portable runtime state
+/library.json
+/shelf-settings.json
+/shelf-cache/
+
+# Generated shelf files and launchers
+/*.desktop
+/*.command
+/Launch *.bat
+/open-shelf.sh
+/ROM Shelf.html
+
+# Native build outputs
+/dist/
+/*.exe
+/*.syso
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+*.tmp
