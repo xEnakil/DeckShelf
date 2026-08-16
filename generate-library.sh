@@ -32,7 +32,9 @@ JUNK_EXTRA=""
 die(){ printf '\033[31m%s\033[0m\n' "$*" >&2; exit 1; }
 say(){ printf '%s\n' "$*"; }
 need_value(){
-  [ $# -ge 2 ] && [ -n "${2:-}" ] || die "Option $1 needs a value."
+  if [ $# -lt 2 ] || [ -z "${2:-}" ]; then
+    die "Option $1 needs a value."
+  fi
 }
 
 while [ $# -gt 0 ]; do
